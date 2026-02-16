@@ -19,13 +19,16 @@ jobs:
       - name: Install Marked
         run: npm install marked
 
-      - name: Convert All Folders
+      - name: Convert Markdown to HTML
         run: |
-          # Convert notes/ and PSetsSolutions/
-          find notes/ PSetsSolutions/ -name "*.md" -exec node convert.js {} \;
+          # The -not -name "README.md" ensures we don't overwrite your index with a README conversion
+          find . -name "*.md" -not -path "*/node_modules/*" -not -name "README.md" -exec node convert.js {} \;
 
-      - name: Deploy
+      - name: Generate Table of Contents
+        run: node generate-index.js
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # This sends everything (including images/) to the site
+          publish_dir: ./
