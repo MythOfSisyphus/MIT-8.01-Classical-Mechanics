@@ -1,8 +1,14 @@
 name: Physics Site Build
+
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+
+# This gives the script permission to publish your site
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -21,14 +27,17 @@ jobs:
 
       - name: Convert Markdown to HTML
         run: |
-          # The -not -name "README.md" ensures we don't overwrite your index with a README conversion
+          # Finds all .md files EXCEPT README.md and runs convert.js
           find . -name "*.md" -not -path "*/node_modules/*" -not -name "README.md" -exec node convert.js {} \;
 
       - name: Generate Table of Contents
         run: node generate-index.js
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
